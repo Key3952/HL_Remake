@@ -67,6 +67,7 @@ define ai = Character("GLaDOS", color="#88ccff", what_color="#ffffff", image='gl
 define drk = Character("Доктор Кляйнер", color="#88aaff", what_color="#ffffff")
 define eli = Character("Илай Вэнс", color="#aa8866", what_color="#ffffff")
 define myst = Character("Дейв", color="#ff88ff", what_color="#ffffff")
+define sonic_char = Character("Соник", color="#00aaff", what_color="#ffffff", image='sonic')
 
 # Переменные для отслеживания навыков
 default точность = 0
@@ -617,8 +618,8 @@ label scene_3:
     play music "audio/sonic.ogg" fadein 1.0
 
     show sonic with dissolve
-    myst "GOTTA GO FAST!"
-    myst "Я помогаю тут одному повару. Он совсем с катушек слетел, носится за мной с ножом!"
+    sonic_char "GOTTA GO FAST!"
+    sonic_char "Я помогаю тут одному повару. Он совсем с катушек слетел, носится за мной с ножом!"
     hide sonic
 
     show ramsay_action with dissolve
@@ -675,21 +676,21 @@ label sonic_chase_minigame:
 label sonic_diplomacy:
     scene bg sonic_zone with fade
     show sonic at center
-    myst "Ладно, хватит бегать. Что вам нужно?"
+    sonic_char "Ладно, хватит бегать. Что вам нужно?"
 
     menu:
         "Объяснить ситуацию про Габена":
             if хитрость >= 2:
-                myst "О, так это важно! Держи кольцо, оно поможет."
+                sonic_char "О, так это важно! Держи кольцо, оно поможет."
                 $ союзники.append("соник_друг")
                 $ рецепты.append("кольца_соника")
                 jump sonic_wisdom
             else:
-                myst "Звучит сомнительно. Но давай просто поговорим с поваром."
+                sonic_char "Звучит сомнительно. Но давай просто поговорим с поваром."
                 jump sonic_wisdom
         "Предложить обмен на морковку":
             $ хитрость += 1
-            myst "Морковка? Я ёж, а не заяц! Но ладно, беги уже."
+            sonic_char "Морковка? Я ёж, а не заяц! Но ладно, беги уже."
             jump sonic_wisdom
 
 # Поимка Соника
@@ -697,12 +698,12 @@ label sonic_catch:
     scene bg sonic_zone with fade
 
     show sonic at right with dissolve
-    myst "Ладно-ладно, сдаюсь! Что вам нужно?"
+    sonic_char "Ладно-ладно, сдаюсь! Что вам нужно?"
 
     show ramsay_action at left
     gr "Твои кольца! Они — чистая энергия скорости!"
 
-    myst "Эй, это мои кольца! Я без них не могу!"
+    sonic_char "Эй, это мои кольца! Я без них не могу!"
 
     hide sonic
     hide ramsay_action
@@ -715,18 +716,18 @@ label sonic_catch:
             $ риск += 2
             $ хаос_фактор += 10
             $ союзники.append("кольца_соника")
-            myst "Эй! Некрасиво!"
+            sonic_char "Эй! Некрасиво!"
             gr "РАДИ ВЫСШЕЙ ЦЕЛИ!"
 
         "Договориться, пообещать вернуть":
             $ хитрость += 1
             $ союзники.append("соник_друг")
-            myst "Ладно, только верни потом!"
+            sonic_char "Ладно, только верни потом!"
             gr "Гениально! Дипломатия!"
 
         "Спросить, зачем они вообще нужны":
             $ основы += 1
-            myst "Ну... они хранят воспоминания о всех мирах, где я был"
+            sonic_char "Ну... они хранят воспоминания о всех мирах, где я был"
             gr "ВОТ! ЭТО КЛЮЧ!"
 
     jump sonic_wisdom
@@ -942,7 +943,7 @@ label final_balance:
 
     "Вы создаёте блюдо, где каждый элемент дополняет другой. Гармония."
 
-    gab "ИНТЕРЕСНО... АНАЛИЗ... 50% ИДЕАЛА... 50% ХАОСА..."
+    gab "ИНТЕРЕСНО... АНАЛИЗ... 50%% ИДЕАЛА... 50%% ХАОСА..."
     gab "Я НЕ МОГУ ВЫБРАТЬ. Я ЗАВИС. ЭТО... ПРИЯТНО?"
 
     show ramsay_normal at left with dissolve
