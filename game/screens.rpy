@@ -311,6 +311,8 @@ screen navigation():
 
         textbutton _("Preferences") action ShowMenu("preferences")
 
+        textbutton _("Minigames") action ShowMenu("minigames_menu")
+
         if _in_replay:
 
             textbutton _("End Replay") action EndReplay(confirm=True)
@@ -1506,6 +1508,25 @@ define bubble.expand_area = {
     "top_right" : (0, 22, 0, 0),
     "thought" : (0, 0, 0, 0),
 }
+
+## Minigames Menu ##############################################################
+
+screen minigames_menu():
+
+    tag menu
+    use game_menu(_("Мини-игры"), scroll="viewport"):
+
+        vbox:
+            spacing 30
+            xalign 0.5
+
+            textbutton "Испытание точностью" action Jump("freeplay_precision")
+            textbutton "Испытание хаосом" action Jump("freeplay_chaos")
+            # Здесь можно добавить другие мини-игры:
+            # textbutton "Оборона от зомби (PvZ)" action Jump("freeplay_pvz_defense")
+            # textbutton "Погоня за Соником" action Jump("freeplay_sonic_chase")
+            # textbutton "Финальный синтез" action Jump("freeplay_final_synthesis")
+
 
 
 

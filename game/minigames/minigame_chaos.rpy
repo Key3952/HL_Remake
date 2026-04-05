@@ -7,7 +7,7 @@ init python:
             self.is_good = is_good
             self.color = color
             self.cell = cell
-            self.life_time = random.uniform(4.0, 7.0)
+            self.life_time = random.uniform(2.0, 5.0)
             self.base_size = random.randint(55, 85)
             self.pulse_max = random.uniform(1.1, 1.3)
             self.pulse_speed = random.uniform(1.5, 3.0)
@@ -60,7 +60,7 @@ screen chaos_minigame_screen():
     ]
 
     timer 0.1 repeat True action If(time_left > 0, SetScreenVariable("time_left", time_left - 0.1), Return(score))
-    timer 0.8 repeat True action Function(spawn_chaos_item, items, grid_positions)
+    timer 0.65 repeat True action Function(spawn_chaos_item, items, grid_positions)
     timer 0.1 repeat True action Function(age_chaos_items, items)
 
     add Solid("#000e")

@@ -84,13 +84,18 @@ label minigame_precision:
                     self.yellow_center -= shift
                 else:
                     self.yellow_center += shift
+
                 shrink_yellow = random.uniform(0.01, 0.05)
                 shrink_green = random.uniform(0.01, 0.04)
                 min_yellow_rel = self.min_yellow_px / 600.0
                 min_green_rel = self.min_green_px / 600.0
-                self.yellow_width = max(min_yellow_rel, self.yellow_width - shrink_yellow)
+                # Сужаем жёлтую полосу
+                self.yellow_width = max(min_yellow_rel, self.yellow_width - 2 * shrink_green)
+                # Сужаем зелёную полосу
                 self.green_width = max(min_green_rel, self.green_width - shrink_green)
+                # Зелёная не может быть шире жёлтой
                 self.green_width = min(self.green_width, self.yellow_width)
+
                 half_yellow = self.yellow_width / 2
                 if self.yellow_center - half_yellow < 0:
                     self.yellow_center = half_yellow
