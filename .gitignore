@@ -1,6 +1,7 @@
 # Directories that Ren'Py changes files in.
 /game/saves
 /game/cache
+.gitignore
 
 # User-specific save data
 /saves
