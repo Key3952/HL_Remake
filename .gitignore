@@ -35,33 +35,3 @@
 # IntelliJ
 .idea/
 .gigaide/
-
-# Vim
-*~
-.swp
-.swo
-
-# Emacs
-*~
-\#*\#
-
-# Nano
-.nano_history
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Atom
-.atom/
-
-# Visual Studio
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Generic
-*.swp
-.DS_Store
-Thumbs.db
