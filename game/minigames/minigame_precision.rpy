@@ -3,7 +3,6 @@
 label minigame_precision:
     window hide
     $ renpy.block_rollback()
-
     python:
         import random
 
@@ -22,8 +21,7 @@ label minigame_precision:
                 self.miss_cuts = 0
                 self.active = True
                 self.game_over = False
-                self.misses_allowed = 1  # можно допустить 1 промах
-
+                self.misses_allowed = 1
                 self.yellow_center = 0.5
                 self.yellow_width = 0.4
                 self.green_width = 0.15
@@ -63,7 +61,6 @@ label minigame_precision:
                         self.game_over = True
                         self.active = False
                     else:
-                        # промах, но не фатальный – просто пропускаем раунд без изменений
                         self.current_round += 1
                         if self.current_round >= self.rounds:
                             self.active = False
@@ -72,10 +69,8 @@ label minigame_precision:
                             self.direction = random.choice([-1, 1])
                         return
 
-                # Успешный рез
                 self.speed = min(self.speed * 1.1, 1.5)
                 self.adjust_zones(self.direction)
-
                 self.current_round += 1
                 if self.current_round >= self.rounds:
                     self.active = False
@@ -89,7 +84,6 @@ label minigame_precision:
                     self.yellow_center -= shift
                 else:
                     self.yellow_center += shift
-
                 shrink_yellow = random.uniform(0.01, 0.05)
                 shrink_green = random.uniform(0.01, 0.04)
                 min_yellow_rel = self.min_yellow_px / 600.0
@@ -97,7 +91,6 @@ label minigame_precision:
                 self.yellow_width = max(min_yellow_rel, self.yellow_width - shrink_yellow)
                 self.green_width = max(min_green_rel, self.green_width - shrink_green)
                 self.green_width = min(self.green_width, self.yellow_width)
-
                 half_yellow = self.yellow_width / 2
                 if self.yellow_center - half_yellow < 0:
                     self.yellow_center = half_yellow
@@ -114,41 +107,11 @@ label minigame_precision:
                 else:
                     return "ok"
 
-    # Основной цикл игры – будет повторяться при выборе "Повторить испытание"
-    label .game_loop:
-        python:
-            game = PrecisionGame(rounds=5)
-            result = renpy.call_screen("precision_game_screen", game=game)
-    if result == "fail":
-        # Провал: два промаха
-        menu:
-            "Испытание провалено. Что делаем?"
-            "Повторить испытание":
-                jump .game_loop
-            "Вернуться к выбору испытаний":
-                window show
-                jump scene_1
-    else:
-        # Успех (perfect/good/ok – но ok не бывает, т.к. 5 раундов, всегда будет good или perfect)
-        # Сохраняем результат в переменную для последующей обработки
-        $ final_result = result
-        if final_result == "perfect":
-            $ точность += 3
-            $ порядок_фактор += 10
-            $ отношение_ивлев += 25
-            $ рецепты.append("идеальная_нарезка")
-            ai "Превосходно! Ваша точность достойна уважения. Идеальные кубы."
-            i "Фримен! Ты справился блестяще! Я горжусь."
-        else:
-            $ точность += 1
-            $ порядок_фактор += 5
-            $ отношение_ивлев += 10
-            $ рецепты.append("аккуратная_нарезка")
-            ai "Неплохо. Не идеал, но кубики вполне пригодны."
-            i "Хорошая работа, но стремись к совершенству!"
-        window show
-        return
-
+    python:
+        game = PrecisionGame(rounds=5)
+        result = renpy.call_screen("precision_game_screen", game=game)
+    window show
+    return result
 
 screen precision_game_screen(game):
     key "dismiss" action Function(game.cut)
