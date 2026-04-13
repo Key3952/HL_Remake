@@ -1,4 +1,4 @@
-# minigame_sonic_runner.rpy - простая версия, без плавности, но со случайной задержкой
+# minigame_sonic_runner.rpy - ускоренная версия со случайной скоростью объектов
 
 init python:
     import random
@@ -19,10 +19,11 @@ init python:
             self.active = True
             self.paused = True
             self.player_lane = 3
-            self.objects = []          # (x, lane, type)
+            # Каждый объект: (x, lane, type, counter, interval)
+            self.objects = []
             self.spawn_timer = 0
-            self.spawn_delay = random.uniform(0.1, 0.7)
-            self.move_counter = 0
+            self.spawn_delay = random.uniform(0.1, 0.5)   # чаще спаун (0.1-0.5 сек)
+            self.move_counter = 0   # общий счётчик для движения (не используется, оставим на всякий случай)
 
         def set_lane(self, delta):
             if self.game_over or not self.active or self.paused:
@@ -32,7 +33,7 @@ init python:
                 self.player_lane = new_lane
 
         def _is_lane_free(self, lane):
-            for x, l, _ in self.objects:
+            for x, l, _, _, _ in self.objects:
                 if l == lane and x >= 0:
                     return False
             return True
@@ -46,12 +47,17 @@ init python:
                     free.append(lane)
             return free
 
+        def _get_random_interval(self):
+            # скорость: 1 = самый быстрый (тик 0.1 сек), 2 = средний, 3 = медленный
+            # сместим в сторону быстрых: 1,1,2
+            return random.choice([1, 1, 2])
+
         def _spawn_obstacle(self):
-            # сначала на линию игрока
             if self._is_lane_free(self.player_lane):
-                self.objects.append((20, self.player_lane, "obstacle"))
+                interval = self._get_random_interval()
+                self.objects.append((20, self.player_lane, "obstacle", 0, interval))
                 return True
-            # ближайшая свободная
+            # ближайшая свободная линия
             best_lane = None
             best_dist = self.lanes + 1
             for lane in range(self.lanes):
@@ -63,7 +69,8 @@ init python:
                         best_dist = dist
                         best_lane = lane
             if best_lane is not None:
-                self.objects.append((20, best_lane, "obstacle"))
+                interval = self._get_random_interval()
+                self.objects.append((20, best_lane, "obstacle", 0, interval))
                 return True
             return False
 
@@ -71,7 +78,8 @@ init python:
             free_lanes = self._get_free_lanes(exclude_player=True)
             if free_lanes:
                 lane = random.choice(free_lanes)
-                self.objects.append((20, lane, "ring"))
+                interval = self._get_random_interval()
+                self.objects.append((20, lane, "ring", 0, interval))
                 return True
             return False
 
@@ -79,20 +87,20 @@ init python:
             if self.game_over or not self.active or self.paused:
                 return
 
-            # 1. Движение: раз в 2 тика (0.2 сек) сдвигаем на 1
-            self.move_counter += 1
-            if self.move_counter >= 2:
-                self.move_counter = 0
-                new_objects = []
-                for x, lane, typ in self.objects:
+            # 1. Движение объектов (индивидуальная скорость)
+            new_objects = []
+            for x, lane, typ, counter, interval in self.objects:
+                counter += 1
+                if counter >= interval:
+                    counter = 0
                     x -= 1
-                    if x >= 0:
-                        new_objects.append((x, lane, typ))
-                self.objects = new_objects
+                if x >= 0:
+                    new_objects.append((x, lane, typ, counter, interval))
+            self.objects = new_objects
 
             # 2. Столкновения
             for obj in self.objects[:]:
-                x, lane, typ = obj
+                x, lane, typ, _, _ = obj
                 if lane == self.player_lane and x == 0:
                     if typ == "ring":
                         self.score += 1
@@ -110,15 +118,16 @@ init python:
                             self.active = False
                             return
 
-            # 3. Спаун с случайной задержкой (таймер увеличивается каждые 0.1 сек)
-            self.spawn_timer += 0.1
-            if len(self.objects) < self.max_objects and self.spawn_timer >= self.spawn_delay:
-                self.spawn_timer = 0
-                self.spawn_delay = random.uniform(0.1, 0.7)
-                if random.random() < 0.5:
-                    self._spawn_obstacle()
-                else:
-                    self._spawn_ring()
+            # 3. Спаун с задержкой
+            if len(self.objects) < self.max_objects:
+                self.spawn_timer += 0.1
+                if self.spawn_timer >= self.spawn_delay:
+                    self.spawn_timer = 0
+                    self.spawn_delay = random.uniform(0.1, 0.5)  # частая смена
+                    if random.random() < 0.5:
+                        self._spawn_obstacle()
+                    else:
+                        self._spawn_ring()
 
         def start(self):
             self.paused = False
@@ -190,7 +199,7 @@ label minigame_sonic_runner:
                             pos (60, player_y)
 
                     # Объекты
-                    for x, lane, typ in game.objects:
+                    for x, lane, typ, _, _ in game.objects:
                         $ y = 40 + lane * 70
                         if typ == "ring":
                             if use_images and ring_img:

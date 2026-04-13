@@ -1,4 +1,5 @@
 # minigame_final_battle.rpy - финальная битва с Габеном (вопросы + последовательность)
+# Добавлены подложки под текст для читаемости
 
 init python:
     import random
@@ -39,7 +40,7 @@ init python:
             self.bonus = min(self.bonus, 10)  # не больше 10
 
             self.total_score = 0
-            self.current_stage = 0  # 0-бонус, 1-вопросы, 2-последовательность
+            self.current_stage = 0
             self.questions_score = 0
             self.sequence_score = 0
             self.sequence = []
@@ -49,27 +50,24 @@ init python:
             self.waiting_input = True
 
         def get_question(self, index):
-            # возвращает текст вопроса и варианты ответов
-            if index == 0:  # Ивлев
+            if index == 0:
                 return ("Что важнее всего в идеальном блюде?",
                         ("Точность и выверенность каждого действия", "Точность"),
                         ("Энергия и рискованные эксперименты", "Хаос"),
                         ("Душа и традиции", "Душа"))
-            elif index == 1:  # Агзамов
+            elif index == 1:
                 return ("Что даёт блюду неповторимый вкус?",
                         ("Идеальная температура и пропорции", "Точность"),
                         ("Неожиданные сочетания и огонь", "Хаос"),
                         ("Любовь и память о доме", "Душа"))
-            else:  # Рамзи
+            else:
                 return ("Как исправить ошибку в рецепте?",
                         ("Пересчитать всё заново", "Точность"),
                         ("Импровизировать на ходу", "Хаос"),
                         ("Вернуться к истокам и начать сначала", "Душа"))
 
         def check_question_answer(self, index, selected):
-            # определяет, какой ответ считается правильным для игрока
-            # на основе его навыков и отношений
-            if index == 0:  # Ивлев
+            if index == 0:
                 if self.точность >= self.риск and self.точность >= self.основы:
                     correct = "Точность"
                 elif self.риск > self.точность and self.риск > self.основы:
@@ -77,14 +75,13 @@ init python:
                 elif self.основы > self.точность and self.основы > self.риск:
                     correct = "Душа"
                 else:
-                    # если равенство, ориентируемся на отношение к Ивлеву
                     if self.отношение_ивлев >= self.отношение_агзамов and self.отношение_ивлев >= self.отношение_рамзи:
                         correct = "Точность"
                     elif self.отношение_агзамов >= self.отношение_ивлев and self.отношение_агзамов >= self.отношение_рамзи:
                         correct = "Хаос"
                     else:
                         correct = "Душа"
-            elif index == 1:  # Агзамов
+            elif index == 1:
                 if self.риск >= self.точность and self.риск >= self.основы:
                     correct = "Хаос"
                 elif self.точность > self.риск and self.точность > self.основы:
@@ -98,7 +95,7 @@ init python:
                         correct = "Точность"
                     else:
                         correct = "Душа"
-            else:  # Рамзи
+            else:
                 if self.основы >= self.риск and self.основы >= self.точность:
                     correct = "Душа"
                 elif self.риск > self.основы and self.риск > self.точность:
@@ -113,11 +110,9 @@ init python:
                     else:
                         correct = "Хаос"
 
-            # Начисляем очки: за правильный ответ 2, за неправильный 0, но с лояльностью
             if selected == correct:
                 return 2
             else:
-                # Лояльность: если у игрока высокий навык, соответствующий выбранному ответу, даём 1 очко
                 if selected == "Точность" and self.точность >= 5:
                     return 1
                 elif selected == "Хаос" and self.риск >= 5:
@@ -128,19 +123,16 @@ init python:
                     return 0
 
         def generate_sequence(self):
-            # длина последовательности зависит от скорости и эффективности
             length = 3 + (self.скорость // 3) + (self.эффективность // 3)
-            length = min(length, 5)  # от 3 до 5
+            length = min(length, 5)
             actions = ["резать", "мешать", "жарить", "солить", "полить соусом"]
             self.sequence = [random.choice(actions) for _ in range(length)]
             return self.sequence
 
         def check_sequence(self, user_seq):
-            # сравнивает последовательности
             if user_seq == self.sequence:
                 score = len(self.sequence)
             else:
-                # лояльность: считаем количество совпавших элементов по позициям
                 score = sum(1 for i in range(min(len(user_seq), len(self.sequence))) if user_seq[i] == self.sequence[i])
             self.sequence_score = score
             return score
@@ -153,22 +145,22 @@ label minigame_final_battle:
         battle = FinalBattle(точность, риск, основы, скорость, эффективность, хитрость, секретки,
                              отношение_ивлев, отношение_агзамов, отношение_рамзи,
                              рецепты, союзники)
-        # Начинаем с бонуса
         total = battle.bonus
         question_answers = [0, 0, 0]
 
-    # Этап 1: Бонус (показываем сообщение)
     $ renpy.say(None, f"Габен анализирует ваши навыки... Вы получаете {battle.bonus} бонусных очков за подготовку.", interact=True)
 
-    # Этап 2: Три вопроса
     screen final_question_screen(q_index, question, opt1, opt2, opt3):
-        vbox:
+        frame:
+            background Solid("#000000aa")
             xalign 0.5 yalign 0.3
-            spacing 20
-            text question size 30 xalign 0.5
-            textbutton opt1[0] action Return(opt1[1]) xsize 400 xalign 0.5
-            textbutton opt2[0] action Return(opt2[1]) xsize 400 xalign 0.5
-            textbutton opt3[0] action Return(opt3[1]) xsize 400 xalign 0.5
+            xpadding 30 ypadding 30
+            vbox:
+                spacing 20
+                text question size 30 xalign 0.5 color "#ffffff"
+                textbutton opt1[0] action Return(opt1[1]) xsize 400 xalign 0.5
+                textbutton opt2[0] action Return(opt2[1]) xsize 400 xalign 0.5
+                textbutton opt3[0] action Return(opt3[1]) xsize 400 xalign 0.5
 
     python:
         for i in range(3):
@@ -185,25 +177,25 @@ label minigame_final_battle:
                 renpy.say(None, "Габен не впечатлён, но вы не сдаётесь.")
         total_questions = sum(question_answers)
 
-    # Этап 3: Последовательность
     $ renpy.say(None, "Теперь Габен проверит вашу реакцию. Повторите последовательность действий!")
     python:
         sequence = battle.generate_sequence()
         seq_str = " → ".join(sequence)
         renpy.say(None, f"Запомните: {seq_str}")
-        # Даём время на запоминание (пауза)
         renpy.pause(2.0)
-        # Пользователь вводит последовательность
         user_seq = []
         actions_list = ["резать", "мешать", "жарить", "солить", "полить соусом"]
 
     screen sequence_input(step, total_steps):
-        vbox:
+        frame:
+            background Solid("#000000aa")
             xalign 0.5 yalign 0.4
-            spacing 10
-            text "Шаг [step] из [total_steps]" size 30
-            for act in actions_list:
-                textbutton act action Return(act) xsize 200
+            xpadding 30 ypadding 30
+            vbox:
+                spacing 10
+                text "Шаг [step] из [total_steps]" size 30 color "#ffffff"
+                for act in actions_list:
+                    textbutton act action Return(act) xsize 200
 
     python:
         for step in range(len(sequence)):
@@ -216,7 +208,6 @@ label minigame_final_battle:
         else:
             renpy.say(None, f"Вы повторили {seq_score} из {len(sequence)} действий. Неплохо для начала.")
 
-    # Финальный счёт
     $ final_score = total
     $ renpy.say(None, f"Общий счёт: {final_score} очков. Габен впечатлён вашей подготовкой!")
 
